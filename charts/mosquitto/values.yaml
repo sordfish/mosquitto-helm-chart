@@ -42,7 +42,7 @@ securityContext: {}
 service:
   internal:
     type: ClusterIP
-    port: 1443
+    port: 1883
   external:
     enabled: true
     type: ClusterIP
@@ -112,3 +112,5 @@ affinity: {}
 mosquitto:
   passwordsTxt: |
     admin:$7$101$A1WI43cBZKN9/64V$mDxNy0vBXD3GN0ClIx0vUU8r2wKpr0vbtHV8EiulbfdwI2MvjL+xW/mALOd7pUR61cgljJujfz88fdb/p9JP9A==
+
+    

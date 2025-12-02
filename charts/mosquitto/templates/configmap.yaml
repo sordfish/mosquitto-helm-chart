@@ -7,6 +7,8 @@ metadata:
 
 data:
   mosquitto.conf: |
+    per_listener_settings true
+   
     listener 1883
     protocol mqtt
     allow_anonymous true
@@ -17,7 +19,6 @@ data:
     protocol mqtt
     allow_anonymous false
     log_dest stdout
-    cafile /mosquitto/certs/ca.crt
     certfile /mosquitto/certs/tls.crt
     keyfile /mosquitto/certs/tls.key
     password_file /mosquitto/passwords.txt
