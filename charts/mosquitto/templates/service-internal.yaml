@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mosquitto.fullname" . }}-internal
+  labels:
+    {{- include "mosquitto.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.internal.type }}
+  ports:
+    - port: {{ .Values.service.internal.port }}
+      targetPort: {{ .Values.service.internal.port }}
+      protocol: TCP
+      name: mqtt-internal
+  selector:
+    {{- include "mosquitto.selectorLabels" . | nindent 4 }}

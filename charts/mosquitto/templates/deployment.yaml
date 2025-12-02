@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mosquitto.fullname" . }}
+  labels:
+    {{- include "mosquitto.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "mosquitto.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "mosquitto.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "mosquitto.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: mqtt-internal
+              containerPort: {{ .Values.service.internal.port }}
+              protocol: TCP
+            {{- if .Values.service.external.enabled }}
+            - name: mqtt-external
+              containerPort: {{ .Values.service.external.port }}
+              protocol: TCP
+            {{- end }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /mosquitto/config/mosquitto.conf
+              subPath: mosquitto.conf
+            {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- if .Values.service.external.enabled }}
+            - name: mosquitto-passwd
+              mountPath: /mosquitto/passwords.txt
+              subPath: passwords.txt
+              readOnly: true
+            - name: tls-cert
+              mountPath: /mosquitto/certs
+              readOnly: true
+            {{- end }}
+      volumes:
+        # Static configmap reference
+        - name: config
+          configMap:
+            name: {{ include "mosquitto.fullname" . }}-config
+        {{- if .Values.service.external.enabled }}
+        - name: mosquitto-passwd
+          secret:
+            secretName: {{ include "mosquitto.fullname" . }}-secret
+        - name: tls-cert
+          secret:
+            secretName: {{ default (printf "%s-tls" (include "mosquitto.fullname" .)) .Values.service.external.tls.secretName }}            
+        {{- end }}
+        # Include any user-defined volumes
+        {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

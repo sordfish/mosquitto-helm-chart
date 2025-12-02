@@ -1,0 +1,17 @@
+{{- if .Values.service.external.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mosquitto.fullname" . }}-external
+  labels:
+    {{- include "mosquitto.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.external.type }}
+  ports:
+    - port: {{ .Values.service.external.port }}
+      targetPort: {{ .Values.service.external.port }}
+      protocol: TCP
+      name: mqtt-external
+  selector:
+    {{- include "mosquitto.selectorLabels" . | nindent 4 }}
+{{- end }}

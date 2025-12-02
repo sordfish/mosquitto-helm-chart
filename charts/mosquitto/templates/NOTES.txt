@@ -1,0 +1,39 @@
+{{- $internal := index .Values.service "internal" -}}
+{{- $external := index .Values.service "external" -}}
+
+# Internal service
+{{- if $internal }}
+  {{- $intType := default "ClusterIP" (index $internal "type") -}}
+  echo "📡 Internal Mosquitto service:"
+  {{- if eq $intType "NodePort" }}
+    export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "mosquitto.fullname" . }}-internal)
+    export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+    echo "  mqtt://$NODE_IP:$NODE_PORT"
+  {{- else if eq $intType "LoadBalancer" }}
+    echo "  Waiting for internal LoadBalancer IP..."
+    export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "mosquitto.fullname" . }}-internal --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+    echo "  mqtt://$SERVICE_IP:{{ index $internal "port" }}"
+  {{- else }}
+    echo "  ClusterIP: use port-forward:"
+    echo "  kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ include "mosquitto.fullname" . }}-internal 1883:{{ index $internal "port" }}"
+  {{- end }}
+{{- end }}
+
+# External service
+{{- if $external }}
+  {{- $extType := default "ClusterIP" (index $external "type") -}}
+  echo ""
+  echo "🌍 External Mosquitto service:"
+  {{- if eq $extType "NodePort" }}
+    export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "mosquitto.fullname" . }}-external)
+    export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+    echo "  mqtt://$NODE_IP:$NODE_PORT"
+  {{- else if eq $extType "LoadBalancer" }}
+    echo "  Waiting for external LoadBalancer IP..."
+    export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "mosquitto.fullname" . }}-external --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+    echo "  mqtt://$SERVICE_IP:{{ index $external "port" }}"
+  {{- else }}
+    echo "  ClusterIP: use port-forward:"
+    echo "  kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ include "mosquitto.fullname" . }}-external 1883:{{ index $external "port" }}"
+  {{- end }}
+{{- end }}

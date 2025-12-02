@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "mosquitto.fullname" . }}-config
+  labels:
+    {{- include "mosquitto.labels" . | nindent 4 }}
+
+data:
+  mosquitto.conf: |
+    listener 1883
+    protocol mqtt
+    allow_anonymous true
+    log_dest stdout
+
+ {{- if .Values.service.external.enabled }}
+    listener {{ .Values.service.external.port }}
+    protocol mqtt
+    allow_anonymous false
+    log_dest stdout
+    cafile /mosquitto/certs/ca.crt
+    certfile /mosquitto/certs/tls.crt
+    keyfile /mosquitto/certs/tls.key
+    password_file /mosquitto/passwords.txt
+  {{- end }}
