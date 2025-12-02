@@ -3,6 +3,16 @@ entries:
   mosquitto:
   - apiVersion: v2
     appVersion: 2.0.22
+    created: "2025-12-02T01:15:24.462894177Z"
+    description: A Helm chart for Kubernetes
+    digest: c74aad83c1f3351dd547540ee8451054bd1040b33e960fae729f375c75e0608b
+    name: mosquitto
+    type: application
+    urls:
+    - https://github.com/sordfish/mosquitto-helm-chart/releases/download/mosquitto-0.1.5/mosquitto-0.1.5.tgz
+    version: 0.1.5
+  - apiVersion: v2
+    appVersion: 2.0.22
     created: "2025-12-02T00:27:18.960998421Z"
     description: A Helm chart for Kubernetes
     digest: f38cecbe6fa42acef0aa744ddff3b3ddbf0908288fa96358b44571eaf5becf63
@@ -11,4 +21,4 @@ entries:
     urls:
     - https://github.com/sordfish/mosquitto-helm-chart/releases/download/mosquitto-0.1.4/mosquitto-0.1.4.tgz
     version: 0.1.4
-generated: "2025-12-02T00:27:18.961010734Z"
+generated: "2025-12-02T01:15:24.462902583Z"
