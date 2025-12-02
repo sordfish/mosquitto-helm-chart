@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - 'charts/**'
-      - '.github/workflows/build-and-helm-chart-release.yaml' 
+      - '.github/workflows/build-helm-chart-release.yaml' 
 
 jobs:
   release:
